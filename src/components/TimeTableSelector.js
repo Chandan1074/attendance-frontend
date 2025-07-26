@@ -4,15 +4,6 @@ import axios from 'axios';
 const subjects = ["Math", "Physics", "Chemistry", "English", "Biology", "Computer"];
 const today = new Date().toISOString().split('T')[0];
 
-// ✅ Moved outside so it can be used in dependency array
-const generateDayPlan = (studentList) => {
-  return Array.from({ length: 7 }, (_, i) => ({
-    period: i + 1,
-    subject: subjects[Math.floor(Math.random() * subjects.length)],
-    attendance: studentList.map(s => ({ ...s, status: '' })),
-  }));
-};
-
 function TimeTableSelector() {
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -23,12 +14,22 @@ function TimeTableSelector() {
     axios.get('http://localhost:8080/api/students')
       .then(response => {
         setStudents(response.data);
+
+        // ✅ Move this function inside useEffect (not needed as dependency)
+        const generateDayPlan = (studentList) => {
+          return Array.from({ length: 7 }, (_, i) => ({
+            period: i + 1,
+            subject: subjects[Math.floor(Math.random() * subjects.length)],
+            attendance: studentList.map(s => ({ ...s, status: '' })),
+          }));
+        };
+
         setDayPlan(generateDayPlan(response.data));
       })
       .catch(error => {
         console.error('Error fetching students:', error);
       });
-  }, [generateDayPlan]); // ✅ Added dependency here
+  }, []); // ✅ Removed generateDayPlan from dependencies
 
   const handleStatusChange = (studentId, status) => {
     const updatedPlan = [...dayPlan];
@@ -91,6 +92,16 @@ function TimeTableSelector() {
         value={selectedDate}
         onChange={(e) => {
           setSelectedDate(e.target.value);
+
+          // ✅ Define generateDayPlan here too
+          const generateDayPlan = (studentList) => {
+            return Array.from({ length: 7 }, (_, i) => ({
+              period: i + 1,
+              subject: subjects[Math.floor(Math.random() * subjects.length)],
+              attendance: studentList.map(s => ({ ...s, status: '' })),
+            }));
+          };
+
           setDayPlan(generateDayPlan(students));
           setSelectedPeriod(null);
         }}
