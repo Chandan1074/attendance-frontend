@@ -1,11 +1,19 @@
-// ...imports remain the same
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function TimeTableSelector() {
-  const subjects = ["Math", "Physics", "Chemistry", "English", "Biology", "Computer"];
-  const today = new Date().toISOString().split('T')[0];
+const subjects = ["Math", "Physics", "Chemistry", "English", "Biology", "Computer"];
+const today = new Date().toISOString().split('T')[0];
 
+// ✅ Moved outside so it can be used in dependency array
+const generateDayPlan = (studentList) => {
+  return Array.from({ length: 7 }, (_, i) => ({
+    period: i + 1,
+    subject: subjects[Math.floor(Math.random() * subjects.length)],
+    attendance: studentList.map(s => ({ ...s, status: '' })),
+  }));
+};
+
+function TimeTableSelector() {
   const [students, setStudents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -20,15 +28,7 @@ function TimeTableSelector() {
       .catch(error => {
         console.error('Error fetching students:', error);
       });
-  }, []);
-
-  const generateDayPlan = (studentList) => {
-    return Array.from({ length: 7 }, (_, i) => ({
-      period: i + 1,
-      subject: subjects[Math.floor(Math.random() * subjects.length)],
-      attendance: studentList.map(s => ({ ...s, status: '' })),
-    }));
-  };
+  }, [generateDayPlan]); // ✅ Added dependency here
 
   const handleStatusChange = (studentId, status) => {
     const updatedPlan = [...dayPlan];
@@ -74,7 +74,6 @@ function TimeTableSelector() {
     setSelectedPeriod(null);
   };
 
-  // 🔢 Count statistics
   const getStats = () => {
     const periodData = dayPlan[selectedPeriod];
     const total = periodData.attendance.length;
@@ -116,7 +115,6 @@ function TimeTableSelector() {
             🕘 Period {dayPlan[selectedPeriod].period} — {dayPlan[selectedPeriod].subject}
           </h3>
 
-          {/* 🔢 Student attendance stats */}
           <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>
             {(() => {
               const { total, present, absent } = getStats();
