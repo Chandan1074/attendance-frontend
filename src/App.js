@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import AttendanceHistory from './components/AttendanceHistory';
-import TimeTableAttendance from './components/TimeTableAttendance';
 import TimeTableSelector from './components/TimeTableSelector';
 import AddStudent from './components/Addstudent';
 import Summary from './components/Summary';
